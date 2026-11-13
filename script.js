@@ -1,3 +1,7 @@
+// Telefoni e tablet (puntatore touch, niente hover): solo qui si alleggerisce il lavoro.
+// Su PC tutto resta com'era.
+const MOBILE = matchMedia("(hover:none) and (pointer:coarse)").matches;
+
 const people = {
   francesco: {
     name: "Francesco",
@@ -132,6 +136,7 @@ const photoZoomCanvas = document.getElementById("photoZoomCanvas");
 const photoZoomReset = document.getElementById("photoZoomReset");
 const photoZoomHint = document.getElementById("photoZoomHint");
 const photoZoomCtx = photoZoomCanvas.getContext("2d", { alpha: false });
+if (MOBILE) photoZoomHint.textContent = "Pizzica per ingrandire · trascina per muoverti · doppio tocco per lo zoom";
 
 const PZ_IMG_W = Number(mosaicPhotoButton.dataset.width) || 0;
 const PZ_IMG_H = Number(mosaicPhotoButton.dataset.height) || 0;
@@ -141,7 +146,7 @@ const PZ_TILES_PATH = (mosaicPhotoButton.dataset.tiles || "").replace(/\/$/, "")
 const PZ_MAX_SCALE = 2000;     // pixel schermo per pixel della foto: oltre non c'è più nulla da vedere
 const PZ_STEP = 1.6;           // fattore dei pulsanti + e −
 const PZ_MAX_ACTIVE = 6;       // download di tasselli in parallelo
-const PZ_MAX_CACHED = 140;     // tasselli decodificati tenuti in memoria
+const PZ_MAX_CACHED = MOBILE ? 64 : 140; // tasselli decodificati tenuti in memoria (~1 MB l'uno)
 const PZ_BG = "#170f0b";
 const PZ_LEVEL_FX = [];        // fattori di scala di ogni livello (livello 0 = foto piena)
 const PZ_LEVEL_FY = [];
@@ -720,7 +725,14 @@ const spr = document.createElement("canvas"); spr.width = spr.height = 24;
   c.fillStyle = g; c.fillRect(0, 0, 24, 24); }
 let P = [];
 function size() { cv.width = innerWidth >> 1; cv.height = innerHeight >> 1; cx.setTransform(.5, 0, 0, .5, 0, 0); }
-addEventListener("resize", size); size();
+// Sul telefono "resize" scatta a ogni comparsa/scomparsa della barra di Chrome mentre si scorre:
+// ridimensionare la canvas ogni volta la svuota e la rialloca. Si rifà solo per cambi veri (rotazione).
+let sizeW = innerWidth, sizeH = innerHeight;
+addEventListener("resize", () => {
+  if (MOBILE && innerWidth === sizeW && Math.abs(innerHeight - sizeH) < 160) return;
+  sizeW = innerWidth; sizeH = innerHeight; size();
+});
+size();
 function spawn(x, y, b) {
   const a = Math.random() * 6.28, s = b ? 1 + Math.random() * 4 : .3 + Math.random() * .6;
   P.push({ x, y, vx: b ? Math.cos(a) * s : (Math.random() - .5) * .4, vy: b ? Math.sin(a) * s - 1 : -s, r: 1 + Math.random() * 2, l: b ? 70 + Math.random() * 70 : 300 + Math.random() * 300 });
@@ -774,11 +786,13 @@ let last = 0, frames = 0, frameTime = 0, emberRaf = 0;
 function tick(t) {
   emberRaf = 0;
   if (document.hidden || modal.classList.contains("is-open")) return;
+  if (MOBILE && t - last < 30) { emberRaf = requestAnimationFrame(tick); return; }
   const raw = t - last, dt = Math.min(2.5, raw / 16.67 || 1); last = t;
   frameTime += raw;
   if (++frames >= 90) {
     const fps = frames * 1000 / frameTime;
-    particleLimit = fps < 50 ? 8 : fps > 57 ? 16 : particleLimit;
+    const lo = MOBILE ? 24 : 50, hi = MOBILE ? 27 : 57; // su telefono il ciclo gira volutamente a ~30 fps
+    particleLimit = fps < lo ? 8 : fps > hi ? 16 : particleLimit;
     frames = 0;
     frameTime = 0;
   }
@@ -852,7 +866,7 @@ addEventListener("click", e => {
 });
 const heroArt = document.querySelector(".hero-art");
 let mx = 0, my = 0, mraf = 0;
-addEventListener("pointermove", e => {
+if (!MOBILE) addEventListener("pointermove", e => {
   mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5;
   if (mraf) return;
   mraf = requestAnimationFrame(() => { mraf = 0; if (scrollY < innerHeight) { heroArt.style.setProperty("--mx", mx); heroArt.style.setProperty("--my", my); } });

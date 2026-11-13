@@ -932,3 +932,92 @@ h1.ink.dry, h2.ink.dry { text-shadow:none; }
   .ink-progress { transition:transform .12s linear; }
   :is(a,button):focus-visible { outline:2px solid var(--gold); outline-offset:5px; }
 }
+/* =====================================================================
+   OTTIMIZZAZIONE TELEFONI — Galaxy A36 (~384 px) e POCO X3 Pro (~393 px)
+   Tutto quello che segue è limitato a schermi stretti o a dispositivi touch:
+   su PC il sito resta identico.
+   ===================================================================== */
+
+/* <picture> non deve creare un livello in più nel layout */
+picture { display:contents; }
+
+/* ---------- Dimensioni ---------- */
+@media (max-width:800px) {
+  html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  a, button { -webkit-tap-highlight-color:transparent; }
+  /* I cerchi dell'hero (ruotando) e i fiori sporgevano dallo schermo: Chrome Android allargava il
+     viewport (fino a ~430 px) e rimpiccioliva tutta la pagina. Qui sporgono ma vengono tagliati. */
+  main { overflow-x:clip; }
+  /* la lettera deve poter scorrere se il testo (o il carattere grande di sistema) non ci sta */
+  .letter-opening .letter-card,
+  .modal.is-open .letter-opening .letter-card { overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
+  .photo-zoom-controls { bottom:calc(16px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (max-width:500px) {
+  .hero { padding-top:112px; padding-bottom:64px; }
+  .hero-art { height:390px; }
+  .hero-photo { width:min(232px,62vw); }
+  .orbit { width:316px; height:316px; }
+  .orbit-b { height:372px; }
+  .hero-copy { padding-top:18px; }
+  .dedication-section { padding:56px 0 90px; }
+  .dedication-note { font-size:22px; line-height:1.3; }
+  .quote-section { padding:76px 22px; }
+  .mosaic-section { padding:90px 0 84px; }
+  .mosaic-heading { margin-bottom:34px; }
+  .mosaic-heading h3 { font-size:17px; line-height:1.4; }
+  /* la foto del mosaico riempie la larghezza (prima restava rimpicciolita con due bande ai lati) */
+  .mosaic-photo-button { min-height:0; }
+  .mosaic-photo { height:auto; aspect-ratio:4/3; }
+  .finale { padding:18px 14px 0; }
+  .finale-border { padding:56px 14px 64px; }
+  /* il piè di pagina su una riga sforava lo schermo */
+  footer { flex-direction:column; gap:6px; padding:22px 0; min-height:0; font-size:14px; letter-spacing:.16em; text-align:center; }
+  footer span:nth-child(2) { font-size:13px; }
+  /* bersagli da toccare di almeno 44 px */
+  .modal-close { width:44px; height:44px; right:4px; top:0; display:grid; place-items:center; }
+  .photo-zoom-close { width:46px; height:46px; }
+}
+
+/* ---------- Prestazioni (solo touch) ---------- */
+@media (hover:none) and (pointer:coarse) {
+  /* Carta bruciata: stesso identico effetto, ma già "cotto" in un'immagine (foto/burn_m.webp)
+     invece del filtro SVG a tutto schermo, che Chrome rifaceva a ogni scorrimento della barra. */
+  .burn { filter:none; box-shadow:none; background:url("foto/burn_m.webp") 0 0 / 100% 100% no-repeat; }
+  /* Grana ferma (a questa opacità non si nota che si muova) e due luci di sfondo ferme */
+  .grain { animation:none; inset:0; }
+  .ambient-one, .ambient-two { animation:none; }
+  /* 3 petali invece di 6 */
+  .falling-petal:nth-child(n+4) { display:none; }
+  /* Il filtro "inchiostro vero" resta sui titoli grandi e sulla citazione; i paragrafi lunghi
+     (lettera, dedica) mantengono l'ombra d'inchiostro ma senza ricalcolare il filtro SVG. */
+  .ink.dry:not(h1):not(h2) { filter:none; }
+  .quote-inner p.ink.dry { filter:url(#inkFx); }
+  /* Entrate e lettera senza sfocatura animata (restano movimento e dissolvenza) */
+  .reveal, .person-card.reveal, .notes article.reveal { filter:none; }
+  .letter-opening .letter-card { filter:none; }
+  @keyframes polishedReveal {
+    from { opacity:0; transform:translate3d(0,20px,0) scale(.985); }
+    to   { opacity:1; transform:translate3d(0,0,0) scale(1); }
+  }
+  @keyframes envelopeAppear {
+    from { opacity:0; transform:translate(-50%,-46%) scale(.94); }
+    to   { opacity:1; transform:translate(-50%,-50%) scale(1); }
+  }
+  @keyframes polishedEnvelope {
+    0%   { opacity:0; transform:translate3d(0,64px,0) rotateX(-30deg) scale(.94); }
+    68%  { opacity:1; transform:translate3d(0,-6px,0) rotateX(2deg) scale(1.005); }
+    100% { opacity:1; transform:translate3d(0,0,0) rotateX(0) scale(1); }
+  }
+  /* Apertura iniziale: invece di ridisegnare a ogni fotogramma un gradiente a tutto schermo,
+     un bordo bruciato fisso che si allarga e svanisce (solo trasformazione e opacità). */
+  .intro-burn {
+    background:radial-gradient(circle at 50% 55%,transparent 14%,#ff9a3ccc 22%,#5a2410 30%,#140803 46%);
+    animation:burnOpenM 2.1s cubic-bezier(.5,0,.4,1) forwards;
+    will-change:transform,opacity;
+  }
+  @keyframes burnOpenM {
+    0%   { opacity:1; transform:scale(1); }
+    100% { opacity:0; transform:scale(2.6); }
+  }
+}

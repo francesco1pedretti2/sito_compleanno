@@ -7,6 +7,7 @@ Serve: pip install pillow
 
 Crea accanto alla foto:
   - <nome>_preview.jpg   versione leggera (max 2800 px) mostrata nella pagina
+  - <nome>_preview_m.jpg versione per telefono (max 1600 px), usata dal <picture> in index.html
   - <nome>_tiles/        piramide di tasselli 512x512 (livello 0 = risoluzione piena)
 
 Alla fine stampa gli attributi da copiare sul <button id="mosaicZoomOpen"> in index.html.
@@ -23,6 +24,7 @@ Image.MAX_IMAGE_PIXELS = None
 TILE = 512            # lato dei tasselli
 MIN_LEVEL_WIDTH = 2000  # sotto questa larghezza basta l'anteprima, niente altri livelli
 PREVIEW_SIDE = 2800   # lato lungo dell'anteprima
+PREVIEW_M_SIDE = 1600 # lato lungo dell'anteprima per telefono
 TILE_QUALITY = 82
 PREVIEW_QUALITY = 85
 
@@ -34,6 +36,7 @@ def main():
     base = os.path.splitext(src)[0]
     out_dir = base + "_tiles"
     preview_path = base + "_preview.jpg"
+    preview_m_path = base + "_preview_m.jpg"
 
     img = Image.open(src).convert("RGB")
     width, height = img.size
@@ -44,6 +47,12 @@ def main():
     preview = img.resize((round(width * scale), round(height * scale)), Image.LANCZOS)
     preview.save(preview_path, "JPEG", quality=PREVIEW_QUALITY, optimize=True, progressive=True)
     print(f"Anteprima: {preview_path} ({preview.size[0]}x{preview.size[1]})")
+
+    # Anteprima per telefono (più piccola, meno dati e meno memoria)
+    scale_m = min(1.0, PREVIEW_M_SIDE / max(width, height))
+    preview_m = img.resize((round(width * scale_m), round(height * scale_m)), Image.LANCZOS)
+    preview_m.save(preview_m_path, "JPEG", quality=PREVIEW_QUALITY, optimize=True, progressive=True)
+    print(f"Anteprima telefono: {preview_m_path} ({preview_m.size[0]}x{preview_m.size[1]})")
 
     # Piramide di tasselli
     if os.path.isdir(out_dir):

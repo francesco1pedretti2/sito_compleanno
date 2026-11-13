@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Great+Vibes&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="foto/copertina_m.jpg" media="(hover:none) and (pointer:coarse)" fetchpriority="high">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -90,7 +91,10 @@
         <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
         <svg class="ink-botanical hero-botanical" viewBox="0 0 500 320" aria-hidden="true"><use href="#ink-lily" x="0" y="12" width="190" height="280"/><use href="#ink-rose" x="145" y="36" width="180" height="270"/><use href="#ink-narcissus" x="305" y="15" width="185" height="280"/></svg>
         <div class="hero-photo photo-frame" role="img" aria-label="Foto per i 70 anni della nonna">
-          <img class="hero-image" src="foto/copertina.jpg" alt="Un ricordo con la nonna">
+          <picture>
+            <source media="(hover:none) and (pointer:coarse)" srcset="foto/copertina_m.jpg">
+            <img class="hero-image" src="foto/copertina.jpg" alt="Un ricordo con la nonna" width="1200" height="1600" fetchpriority="high" decoding="async">
+          </picture>
         </div>
         <div class="floating-note note-top">fatto con amore</div>
         <div class="floating-note note-bottom"><span>♥</span> sempre nel cuore</div>
@@ -136,7 +140,10 @@
       </div>
       <div class="mosaic-grid" id="mosaicGrid">
         <button class="mosaic-photo-button reveal" id="mosaicZoomOpen" type="button" aria-label="Ingrandisci la foto del mosaico" data-tiles="foto/mosaico_tiles" data-width="11547" data-height="8660" data-tile-size="512" data-levels="3">
-          <img class="mosaic-photo" src="foto/mosaico_preview.jpg" alt="Un ricordo insieme alla nonna" decoding="async">
+          <picture>
+            <source media="(hover:none) and (pointer:coarse)" srcset="foto/mosaico_preview_m.jpg">
+            <img class="mosaic-photo" src="foto/mosaico_preview.jpg" alt="Un ricordo insieme alla nonna" width="2800" height="2100" loading="lazy" decoding="async">
+          </picture>
         </button>
       </div>
     </section>
